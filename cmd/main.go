@@ -47,7 +47,9 @@ func main() {
 	}
 	for {
 
-		for i := 1; i < 3000; i++ {
+		n := 300
+		for i := 1; i < n; i++ {
+			//wg := sync.WaitGroup{}
 			go func() {
 
 				rand.Seed(time.Now().UnixNano())
@@ -77,12 +79,22 @@ func main() {
 				time.Sleep(time.Second * time.Duration(pause))
 				event.Type = "OnQueueOutEvent"
 				event.EventID = uuid.New().String()
-
+				data, err = json.Marshal(event)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				_, err = client.Post("http://localhost:9999/api/v1/events",
+					"application/json",
+					bytes.NewBuffer(data))
+				if err != nil {
+					log.Println(err)
+				}
 			}()
 		}
 
 		log.Println("one turn finished")
-		time.Sleep(time.Second * 20)
+		time.Sleep(time.Second * 15)
 
 	}
 }
